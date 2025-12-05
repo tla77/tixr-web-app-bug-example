@@ -55,3 +55,11 @@ tixr-overlap-tests/
 │       └── resources/
 │           └── test_data.json   # Test URLs
 ```
+
+## IMPORTANT
+
+Due to DataDome protection on tixr.com, the Selenium tests cannot load the test pages properly so they all fail. I tried using **undetected_chromedriver** and **selenium-stealth** but still no go. I need to talk to the Tixr team to figure out how to bypass DataDome from their end.
+
+![testrun1](../images/testrun1.png)
+![testrun2](../images/testrun2.png)
+![tixr-captcha](../images/tixr-captcha.png)
