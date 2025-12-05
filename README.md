@@ -1,4 +1,4 @@
-# TIXR Web Bug Report — Header Home-Link Container Masked by `links-wrapper`
+# Tixr Web Bug Report — Header Home-Link Container Masked by `links-wrapper` on certain Groups pages
 
 **Issue Type:** Bug  
 **Severity:** High  
@@ -17,13 +17,13 @@ The top-left homepage navigation element (`<div class="home-link hide-mobile">`,
 
 Because of this overlap, the home-link container **cannot receive pointer events**, causing the homepage link to become non-functional.
 
-This affects all users navigating from Group or Event pages.
+This affects all users navigating from certain Groups pages that have this page structure.
 
 ---
 
 ## 📌 Steps to Reproduce
-1. Navigate to any Tixr Groups or Events page.  
-2. Attempt to click the Tixr logo (located within `<div class="home-link hide-mobile">`).  
+1. Navigate to any main Tixr Groups page with this problematic page structure such as: https://www.tixr.com/groups/zamnafestival, https://www.tixr.com/groups/sjearthquakes, or https://www.tixr.com/groups/newcitygas.  
+2. Attempt to click the TIXR(tm) logo (located within `<div class="home-link hide-mobile">`).  
 3. No navigation occurs.  
 4. Open Chrome DevTools → Console  
 5. Run the following code to detect the topmost element at the home-link region:
@@ -101,7 +101,6 @@ This is a **P1 severity** issue because it affects all users and breaks a core n
 ## 🧪 Technical Evidence
 
 ### **Hit-Test Output**
-Running the following:
 
 ```js
 const el = document.querySelector('.home-link.hide-mobile');
@@ -185,9 +184,4 @@ Allow pointer events to pass through unused areas of `links-wrapper`:
 4. Ensure category navigation inside `links-wrapper` still works.  
 5. Validate no layout regressions in header.
 
----
 
-## 📎 Additional Notes
-- Issue confirmed using DOM snapshot (`tixr-groups.html`).  
-- Selenium and Playwright testing both show click interception.  
-- Screenshots or annotations can be added upon request.
