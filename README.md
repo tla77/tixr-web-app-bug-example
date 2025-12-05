@@ -1,4 +1,4 @@
-# TIXR Web Bug Report — Header Logo Unclickable Due to Overlapping `links-wrapper` Div Element
+# TIXR Web Bug Report — Header Home-Link Container Masked by `links-wrapper`
 
 **Issue Type:** Bug  
 **Severity:** High  
@@ -6,89 +6,186 @@
 **Environment:**  
 - Web (Desktop)  
 - Chrome / Firefox / Safari  
-- Affects all viewport sizes
+- Affects all screen sizes tested
 
 ---
 
 ## 🐞 Summary
-The Tixr header logo link (`<a class="logo">`) is not clickable because it is fully covered by the `<div class="links-wrapper">` element.
-This overlapping causes `links-wrapper` to intercept pointer events, preventing navigation back to the homepage.
+The top-left homepage navigation element (`<div class="home-link hide-mobile">`, which contains the Tixr logo link) is being partially or completely masked by the `<div class="links-wrapper">` element.  
+
+Because of this overlap, the home-link container **cannot receive pointer events**, causing the homepage link to become non-functional.
+
+This affects all users navigating from Group or Event pages.
 
 ---
 
 ## 📌 Steps to Reproduce
-1. Open any tixr.com/groups/xxxxxx page that has a `<div class="links-wrapper">` element, such as: https://www.tixr.com/groups/zamnafestival, https://www.tixr.com/groups/sjearthquakes, and https://www.tixr.com/groups/newcitygas.
-2. Hover the mouse over the TIXR(tm) logo in the top-left corner where the carousel(s) begin. 
-3. Attempt to click the logo (nothing happens).  
-4. Open DevTools → Console.
-5. Run the following code to detect the topmost element at the logo’s center:
+1. Navigate to any Tixr Groups or Events page.  
+2. Attempt to click the Tixr logo (located within `<div class="home-link hide-mobile">`).  
+3. No navigation occurs.  
+4. Open Chrome DevTools → Console  
+5. Run the following code to detect the topmost element at the home-link region:
 
     ```js
-    const logo = document.querySelector('a.logo');
-    const rect = logo.getBoundingClientRect();
+    const el = document.querySelector('.home-link.hide-mobile');
+    const rect = el.getBoundingClientRect();
     document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
     ```
 
-6. Observe that the returned element is:
+6. Observe the returned element:
 
     ```
-    <div class="links-wrapper">
+    <div class="links-wrapper">...</div>
     ```
 
    instead of:
 
     ```
-    <a class="logo">
+    <div class="home-link hide-mobile">...</div>
     ```
 
 ---
 
 ## ✔ Expected Behavior
-- The logo should be fully clickable.  
-- Clicking it should navigate to `https://www.tixr.com/`.  
-- No content should overlap or block the header area.
+- The home-link container should sit at the top of the visual hierarchy.  
+- Clicking the logo inside `<div class="home-link hide-mobile">` should always navigate users to `https://www.tixr.com/`.  
+- No content should overlap the header navigation area.
 
 ---
 
 ## ❌ Actual Behavior
-- The logo is visually present but not clickable.  
-- Clicks are intercepted by an overlapping `links-wrapper` element.  
-- The browser’s hit-testing confirms `links-wrapper` is the top element.
+- The `links-wrapper` element overlaps the home-link container.  
+- Clicks intended for the logo/home link are intercepted by `links-wrapper`.  
+- The homepage cannot be accessed using the top-left navigation element.  
+- Browser hit-testing confirms the masking issue.
 
 ---
 
 ## 🔍 Root Cause Analysis
-The `.links-wrapper` element extends upward into the header region, overlapping the clickable bounds of `.logo`.
+The `.links-wrapper` element, which contains category navigation items (e.g., Programmation, Festival Lumen, Bazart), extends vertically upward into the header area, overlapping:
 
-Possible causes:
-- Incorrect spacing (margin/padding pushing upward)
-- A stacking context issue (z-index too high)
-- Positioning rules causing vertical overlap
-- Misaligned container boundaries
+```
+<div class="home-link hide-mobile">
+```
 
-This results in click interception, making the logo non-functional.
+This overlap causes:
+
+- The home-link container to become **non-interactive**
+- Pointer events to be captured by `links-wrapper`
+- A breakdown of expected global navigation behavior  
+
+Potential specific causes include:
+
+- Misconfigured layout spacing (margin or padding)
+- Absolute or relative positioning errors
+- Incorrect stacking context or z-index behavior
+- Parent container height misalignment
 
 ---
 
 ## 🧭 Impact Assessment
 | Area | Impact | Notes |
-|------|--------|-------|
-| Navigation | **High** | Homepage link is blocked |
-| User Experience | **High** | Logo is a standard, expected nav anchor |
-| Brand Trust | Medium | Logo appears broken |
-| SEO / Engagement | Medium | Reduced homepage traffic |
+|------|--------|--------|
+| Navigation | **High** | The expected header → homepage control is broken |
+| UX Consistency | **High** | Violates universal “top-left = home” convention |
+| User Trust | Medium | Site feels unresponsive or broken |
+| Discoverability | High | Users rarely scroll for an alternate homepage link |
+| Conversion Flow | Medium | Users lose a fast way to restart browsing |
 
-This qualifies as a **P1 production issue**.
+This is a **P1 severity** issue because it affects all users and breaks a core navigation pattern.
 
 ---
 
 ## 🧪 Technical Evidence
 
-### Selenium Hit Test
-```java
-JavascriptExecutor js = (JavascriptExecutor) driver;
-WebElement topEl = (WebElement) js.executeScript(
-    "return document.elementFromPoint(arguments[0], arguments[1]);",
-    centerX, centerY
-);
-System.out.println(topEl.getAttribute("class"));
+### **Hit-Test Output**
+Running the following:
+
+```js
+const el = document.querySelector('.home-link.hide-mobile');
+const rect = el.getBoundingClientRect();
+document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
+```
+
+Produces:
+
+```
+<div class="links-wrapper">...</div>
+```
+
+### Interpretation
+The browser reports that `links-wrapper` is the **topmost element** at the logo/home-link's location, proving that it is obstructing the clickable area.
+
+---
+
+## 🛠 Proposed Fix Options
+
+### **Option A — Fix Layout Spacing (Preferred)**
+Ensure `links-wrapper` is positioned below the header nav:
+
+```css
+.links-wrapper {
+    margin-top: 24px; /* or a corrected value based on design */
+}
+```
+
+---
+
+### **Option B — Adjust Stacking Context**
+Guarantee that the header nav is above content sections:
+
+```css
+.home-link.hide-mobile {
+    position: relative;
+    z-index: 20;
+}
+
+.links-wrapper {
+    position: relative;
+    z-index: 1;
+}
+```
+
+---
+
+### **Option C — Make the Wrapper Background Non-Interactive (Quick Fix)**
+Allow pointer events to pass through unused areas of `links-wrapper`:
+
+```css
+.links-wrapper {
+    pointer-events: none;
+}
+
+.links-wrapper * {
+    pointer-events: auto; /* restores clickability of category links */
+}
+```
+
+---
+
+## ✔ Post-Fix Validation Steps
+1. Re-run the hit-test:
+
+    ```js
+    const el = document.querySelector('.home-link.hide-mobile');
+    const rect = el.getBoundingClientRect();
+    document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
+    ```
+
+    Expected output:
+
+    ```
+    <div class="home-link hide-mobile">...</div>
+    ```
+
+2. Confirm the logo link successfully navigates home.  
+3. Test across desktop breakpoints.  
+4. Ensure category navigation inside `links-wrapper` still works.  
+5. Validate no layout regressions in header.
+
+---
+
+## 📎 Additional Notes
+- Issue confirmed using DOM snapshot (`tixr-groups.html`).  
+- Selenium and Playwright testing both show click interception.  
+- Screenshots or annotations can be added upon request.
