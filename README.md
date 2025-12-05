@@ -8,6 +8,8 @@
 - Chrome / Firefox / Safari  
 - Affects all screen sizes tested
 
+![bug-screenshot](images/tixr-groups-page-bug-screenshot.png)
+
 ---
 
 ## 🐞 Summary
