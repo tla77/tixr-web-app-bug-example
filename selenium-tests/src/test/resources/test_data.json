@@ -1,0 +1,8 @@
+{
+  "baseUrl": "https://www.tixr.com",
+  "groups": [
+    "/groups/zamnafestival",
+    "/groups/sjearthquakes",
+    "/groups/newcitygas"
+  ]
+}
