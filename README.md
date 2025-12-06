@@ -13,7 +13,7 @@
 ---
 
 ## 🐞 Description
-The top-left homepage navigation element (`<div class="home-link hide-mobile">`, which contains the Tixr logo link) is being partially or completely masked by the `<div class="links-wrapper">` element.  
+The top-left homepage navigation element (`<div class="home-link hide-mobile">`, which contains the Tixr logo link) is being completely masked by the `<div class="links-wrapper">` element.  
 
 Because of this overlap, the home-link container **cannot receive pointer events**, causing the homepage link to become non-functional.
 
